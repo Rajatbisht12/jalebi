@@ -1,120 +1,72 @@
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import { useEffect, useState } from 'react';
 
 function App() {
-  const [users, setUsers] = useState([]);
-  useEffect(() =>{
-      fetch(`https://dummyjson.com/users`)
-      .then((res) => res.json())
-      .then((data) =>{
-        setUsers(data.users);
-        console.log(users);
-      })
-      .catch((error) =>{
-        console.log(error);
-      })
-  }, []);
+ const [users, setUsers] = useState([]);
+ const [searchQuery, setSearchQuery] = useState('');
 
-  const [query, setQuery] = useState("");
+ useEffect(() => {
+   fetchUsers();
+ }, []);
 
-  const search_parameters = users.length > 0 ? Object.keys(users[0]) : [];
+ const fetchUsers = async () => {
+   try {
+     let response;
+     if (searchQuery) {
+       response = await fetch(`https://dummyjson.com/users/search?q=${searchQuery}`);
+     } else {
+       response = await fetch('https://dummyjson.com/users');
+     }
+     const data = await response.json();
+     setUsers(data.users);
+   } catch (error) {
+     console.log('Error fetching users:', error);
+   }
+ };
 
-  function search(users) {
+ const handleSearch = (e) => {
+   e.preventDefault();
+   const query = e.target.elements.searchInput.value;
+   setSearchQuery(query);
+   fetchUsers();
+ };
 
-    return users.filter((user) =>
-
-      search_parameters.some((parameter) =>
-
-        user[parameter].toString().toLowerCase().includes(query.toLowerCase())
-
-      )
-
-    );
-
-  }
-
-  function isMatch(user) {
-    return user.firstName.toLowerCase().includes(query.toLowerCase());
-  }
-  return (
+ return (
    <div>
-       <div className="input-box">
-
-<input
-
-  type="search"
-
-  name="search-form"
-
-  id="search-form"
-
-  className="search-input"
-
-  onChange={(e) => setQuery(e.target.value)}
-
-  placeholder="Search user"
-
-/>
-
-</div>
-
-<center>
-
-{search(users).map((dataObj) => {
-
-  return (
-
-    <div className="box">
-
-      <div class="card">
-
-        <div class="category">@{dataObj.username} </div>
-
-        <div class="heading">
-
-          {dataObj.name}
-
-          <div class="author">{dataObj.email}</div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  );
-
-})}
-
-</center>
-<center>
-      <table>
-        <tr>
-          <th>firstName</th>
-          <th>lastName</th>
-          <th>maidenName</th>
-          <th>Email</th>
-          <th>Address</th>
-          <th>City</th>
-        </tr>
-        <tbody>
-        {users.map((user, id) =>{
-          return(
-            <tr key={id} className={isMatch(user) ? 'highlited' : ''}>
-              <td>{user.firstName}</td>
-              <td>{user.lastName}</td>
-              <td>{user.maidenName}</td>
-              <td>{user.email}</td>
-              <td>{user.address.address}</td>
-              <td>{user.address.city}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-      </table>
-      </center>      
+     <div className="input-box">
+       <form onSubmit={handleSearch}>
+         <input
+           type="search"
+           name="searchInput"
+           id="search-form"
+           className="search-input"
+           placeholder="Search user"
+         />
+         <button type="submit">Search</button>
+       </form>
+     </div>
+     <center>
+       <table>
+         <thead>
+           <tr>
+             <th>Name</th>
+             <th>Email</th>
+             <th>Address</th>
+           </tr>
+         </thead>
+         <tbody>
+           {users.map((user) => (
+             <tr key={user.id}>
+               <td>{`${user.firstName} ${user.lastName}`}</td>
+               <td>{user.email}</td>
+               <td>{`${user.address.address}, ${user.address.city}`}</td>
+             </tr>
+           ))}
+         </tbody>
+       </table>
+     </center>
    </div>
-  );
+ );
 }
 
 export default App;
