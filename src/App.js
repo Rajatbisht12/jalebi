@@ -87,7 +87,7 @@ function App() {
 })}
 
 </center>
-
+<center>
       <table>
         <tr>
           <th>firstName</th>
@@ -112,6 +112,7 @@ function App() {
         })}
       </tbody>
       </table>
+      </center>      
    </div>
   );
 }
